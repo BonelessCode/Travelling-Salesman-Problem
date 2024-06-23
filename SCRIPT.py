@@ -1,104 +1,81 @@
 from math import *
 from random import randint
+from copy import deepcopy
 pt=((0,0),(1,1),(2,2),(3,3),(4,4),(5,5))
 n=len(pt)
-d_terme=n-3
+d_terme=n-2
+dt_range=n-1
 
 def Empty_List(n):
     """créer une double liste (matrice carrée) nulle de taille n (entier naturel >=3)"""
     inside=[[0 for j in range(n )] for i in range(n)]
     return inside
 
-def Reset(chiffres_restant,a_partir_de,choix_actuel,n):
 
-    """ chiffres_restant: tableau
-    a_partir_de: int (entier naturel)
-    choix_actuel: liste (combinaison actuelle)
-    Permet de réinitialiser les choix possibles pour les nombres après un certain rang (a_partir_de)"""
-
-    for j in range(a_partir_de+1,n-2):
-        print("je suis j",j)
-        chiffres_restant[j]=[p for p in range(2,n+1)]
-
-        # Enlever éléments déjà utilisés avant
-        print("Deux instances:",a_partir_de+1,n-2)
-        print(chiffres_restant[j])
-        for m in range(0,j):
-            chiffres_restant[j].remove(choix_actuel[m])
-        print(chiffres_restant[j])
-
-
-    print(chiffres_restant)
-    return chiffres_restant
-
-
-
-def Combinaison(n):
+def Dernier_Terme(chiffres_restant,dt_range):
     """"""
-    # Ensemble des cominaisons à renvoyer
-    combi=[]
+    p_max_test=0
+    for compteur_test in range(0,dt_range):
+        # Cherche la dernière liste non vide
+        if chiffres_restant[compteur_test]!=[]:
+            p_max_test=compteur_test
 
-    # servira pour créer les combinaisons
-    chiffres_restant=[[j for j in range(2,n+1)] for x in range(n-2)]
+    return p_max_test
 
-    # Permettra d'Initialiser la première combinaison sans répéter
-    choix_possible=[j for j in range(2,n+1)]
+# Ensemble des cominaisons à renvoyer
+combi=[]
+backup=0
+pos_max=4
 
-    choix_actuel=[]
+# servira pour créer les combinaisons
+chiffres_restant=[[j for j in range(2,n+1)] for x in range(dt_range)]
+choix_actuel=[0 for i in range(dt_range)]
 
-    # INITIALISATION! REFAIRE APRES SIMILAIRE
-    for m in range(n-2):
-        # Initiliasation première (aléatoire dans choix_possible)
-        choix=choix_possible[randint(0,len(choix_possible)-1)]
+# Construction de la première Combinaison choisie
+for j in range(dt_range):
+    #choix_actuel[j]=chiffres_restant[j][randint(0,len(chiffres_restant[j])-1)]
 
-        # Ajoute au choix actuel
-        choix_actuel.append(choix)
+    choix_actuel[j]=chiffres_restant[j][0]
 
-        # Enlève de la liste dans laquel on choisira les prochains chiffres
-        choix_possible.remove(choix)
-
-        # minimum évite de dépasser si on est au dernier terme
-        for apres in range(min(m+1,n-2),n-2):
-            chiffres_restant[apres].remove(choix)
-
-
-
+    # Enlève les chiffres déjà utilisés pour les combinaisons suivantes et empêche de dépasser le dernier terme du range
+    for m in range(min(j+1,dt_range),dt_range):
+        chiffres_restant[m].remove(choix_actuel[j])
 
 
+while chiffres_restant[0]!=[]:
+    print(choix_actuel)
+    print(chiffres_restant)
 
-    while chiffres_restant[0]!=[]:
-        # Ajoute la nouvelle combinaison et enlève celle actuelle des possiblités encore envisagable
-        print(choix_actuel)
-        print(chiffres_restant)
-
+    if backup != choix_actuel:
         combi.append(choix_actuel)
-        chiffres_restant[d_terme].remove(choix_actuel[d_terme])
+        backup=deepcopy(choix_actuel)
 
 
-        if chiffres_restant[d_terme]!=[]:
-            choix_actuel[d_terme]=chiffres_restant[d_terme][randint(0,len(chiffres_restant[d_terme])-1)]
-        else:
-            for compteur in range(0,n-2):
-                #Vérifié qu'on puisse continuer
-                if chiffres_restant[d_terme-compteur]!=[]:
 
-                    choix_actuel[d_terme-compteur]=chiffres_restant[d_terme-compteur][randint(0,len(chiffres_restant[d_terme-compteur])-1)]
+    # S'assurer que l'ensemble est toujours non vide
+    pos_max=Dernier_Terme(chiffres_restant,dt_range)
 
-                    chiffres_restant[d_terme-compteur].remove(choix_actuel[d_terme-compteur])
-
-                    # RESET ceux d'après
-                    chiffres_restant=Reset(chiffres_restant,d_terme-compteur,choix_actuel,n) #<-- marche pas encore
-                    # Sort de toutes les boucles
-                    break
-                    break
-                    break
+    # Rafraichissement des données
+    choix_actuel[pos_max]=chiffres_restant[pos_max][0]
+    chiffres_restant[pos_max].remove(choix_actuel[pos_max])
 
 
-    return(combi)
+    # Reinitialisaition des valeurs possibles pour les chiffres suivants
+    # Permet de compenser les vides
+    for k in range(pos_max+1,dt_range):
+        chiffres_restant[k]=[o for o in range(2,n+1)]
+        print(k,"numero")
+        for j in range(0,k):
+            chiffres_restant[k].remove(choix_actuel[j])
 
-print("D'accord:",Combinaison(n))
+        choix_actuel[k]=chiffres_restant[k][0]
+        print(choix_actuel[k],"valeur")
 
 
+
+nb_resultat=len(combi)
+print(nb_resultat)
+print(combi)
 distance=Empty_List(n)
 
 # Création de la matrice comportant les distances
