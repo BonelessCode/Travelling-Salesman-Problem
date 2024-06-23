@@ -1,7 +1,19 @@
+﻿import numpy as np
+import matplotlib.pyplot as plt
+import copy
 from math import *
 from random import randint
 from copy import deepcopy
-pt=((0,0),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6))
+
+pt=[]
+maxi=200000
+mini=-maxi
+nombre_point=8
+# Coordonnees varient entre mini et maxi, generees aleaatoirement.
+for k in range(nombre_point):
+    pt.append((randint(mini,maxi),randint(mini,maxi)))
+print(pt)
+#pt=((10,0),(6,2),(20,3),(10,0))
 n=len(pt)
 d_terme=n-2
 dt_range=n-1
@@ -39,26 +51,25 @@ def Combinaison(choix_actuel,chiffres_restant,n):
     if chiffres_restant!=[[] for k in range(dt_range)]:
         # Recupere la position de la derniere liste non vide
         pos_max=Dernier_Terme(chiffres_restant)
-
         # Rafraichissement des donnees
-        chiffres_restant[pos_max].remove(choix_actuel[pos_max])
+        chiffres_restant[pos_max].remove(choix_actuel[pos_max+1])
 
         # Recursion
         if chiffres_restant[pos_max]==[]:
             choix_actuel,chiffres_restant=Combinaison(choix_actuel,chiffres_restant,n)
 
         # Si on en est pas au dernier terme
-        if choix_actuel!=-1:
+        if chiffres_restant!=[[] for k in range(dt_range)]:
             # Reinitialisaition des valeurs possibles pour les chiffres suivants
             for k in range(pos_max+1,dt_range):
                 chiffres_restant[k]=[o for o in range(2,n+1)]
-                for j in range(0,k):
+                for j in range(1,k+1):
                     chiffres_restant[k].remove(choix_actuel[j])
 
-                choix_actuel[k]=chiffres_restant[k][0]
+                choix_actuel[k+1]=chiffres_restant[k][0]
 
 
-            choix_actuel[pos_max]=chiffres_restant[pos_max][0]
+            choix_actuel[pos_max+1]=chiffres_restant[pos_max][0]
 
             return choix_actuel,chiffres_restant
 
@@ -67,7 +78,7 @@ def Combinaison(choix_actuel,chiffres_restant,n):
     en renvoyant les valeurs adequate et donc cette condition doit etre testee apres etre sorti d'une possible plongee recursive"""
     if chiffres_restant==[[] for k in range(dt_range)]:
         # Valeur speciale de choix_actuel permettant de terminer le programme
-        return (-1,chiffres_restant)
+        return choix_actuel,chiffres_restant
 
 def Distance(combinaison,tableau_pos,n):
     distance_totale=0
@@ -96,42 +107,60 @@ combi=[]
 
 # servira pour creer les combinaisons
 chiffres_restant=[[j for j in range(2,n+1)] for x in range(dt_range)]
-choix_actuel=[0 for i in range(dt_range)]
+choix_actuel=[0 for i in range(n+1)]
 
 # Construction de la premiere Combinaison choisie
-for j in range(dt_range):
-    choix_actuel[j]=chiffres_restant[j][0]
+for j in range(0,dt_range):
+    choix_actuel[j+1]=chiffres_restant[j][0]
 
     # Enleve les chiffres deja utilises pour les combinaisons suivantes et empeche de depasser le dernier terme du range
     for m in range(min(j+1,dt_range),dt_range):
-        chiffres_restant[m].remove(choix_actuel[j])
+        chiffres_restant[m].remove(choix_actuel[j+1])
+
+choix_actuel[0],choix_actuel[n]=1,1
 
 # Initialise les valeurs
-choix_enregistre=[1]+choix_actuel+[1]
+choix_enregistre=copy.deepcopy(choix_actuel)
 dist_enregistre=Distance(choix_enregistre,distances_tab,n)
 print("dist de depart",dist_enregistre)
-
+compteur=0
 # Valeur que prendra choix_actuel a la fin (vois fonction Combinaison)
-while choix_actuel!=-1:
-    choix_actuel_complet=[1]+choix_actuel+[1]
+while chiffres_restant!=[[] for k in range(dt_range)]:
 
     # Ajout dans la liste des combinaison
-    dist_actuelle=Distance(choix_actuel_complet,distances_tab,n)
-    if dist_actuelle<dist_enregistre:
+    dist_actuelle=Distance(choix_actuel,distances_tab,n)
+    if dist_actuelle>dist_enregistre:
 
-        choix_enregistre=choix_actuel_complet
+        choix_enregistre=copy.deepcopy(choix_actuel)
         dist_enregistre=dist_actuelle
 
-    combi.append(choix_actuel_complet)
+    #combi.append(choix_actuel)
+    ##print(choix_actuel)
+    ##print(dist_actuelle,dist_enregistre)
+    print(chiffres_restant)
+    choix_actuel,chiffres_restant=Combinaison(choix_actuel,chiffres_restant,n)
 
-    choix_actuel=Combinaison(choix_actuel,chiffres_restant,n)[0]
+    compteur+=1
 
 
 
-
-
-print("Voici la liste des combinaisons: \n",combi)
+#print("Voici la liste des combinaisons: \n",combi)
 print("Plus courte distance et combinaison liee a ceci: ",dist_enregistre,choix_enregistre)
-# Affiche le nombre de combinaisons differentes possibles
-nb_resultat=len(combi)
-print("Nombre de resultats: ",nb_resultat)
+print("nombre de combinaison:",compteur)
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+pos=0
+for point in pt:
+    pos+=1
+    plt.plot(point[0], point[1], marker='o', markersize=3, color="red")
+    # les ajouts sont des offset
+    ax.text(point[0]+min(5,point[0]//100), point[1]+min(5,point[1]//100), str(pos), fontsize=15)
+
+for trace in range(len(choix_enregistre)-1):
+    x=(pt[choix_enregistre[trace]-1][0],pt[choix_enregistre[min(trace+1,len(choix_enregistre)-1)]-1][0])
+    y=(pt[choix_enregistre[trace]-1][1],pt[choix_enregistre[min(trace+1,len(choix_enregistre)-1)]-1][1])
+    plt.plot(x,y)
+
+
+plt.show()
