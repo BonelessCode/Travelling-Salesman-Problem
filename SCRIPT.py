@@ -1,7 +1,7 @@
 from math import *
 from random import randint
 from copy import deepcopy
-pt=((0,0),(1,1),(2,2),(3,3),(4,4),(5,5))
+pt=((0,0),(1,1),(2,2),(3,3),(4,4),(5,5),(6,6))
 n=len(pt)
 d_terme=n-2
 dt_range=n-1
@@ -39,9 +39,9 @@ def Combinaison(choix_actuel,chiffres_restant,n):
     if chiffres_restant!=[[] for k in range(dt_range)]:
         # Recupere la position de la derniere liste non vide
         pos_max=Dernier_Terme(chiffres_restant)
-        print('le pos max',pos_max)
+
         # Rafraichissement des donnees
-        chiffres_restant[pos_max].remove(choix_actuel[pos_max+1])
+        chiffres_restant[pos_max].remove(choix_actuel[pos_max])
 
         # Recursion
         if chiffres_restant[pos_max]==[]:
@@ -53,12 +53,12 @@ def Combinaison(choix_actuel,chiffres_restant,n):
             for k in range(pos_max+1,dt_range):
                 chiffres_restant[k]=[o for o in range(2,n+1)]
                 for j in range(0,k):
-                    chiffres_restant[k].remove(choix_actuel[j+1])
+                    chiffres_restant[k].remove(choix_actuel[j])
 
-                choix_actuel[k+1]=chiffres_restant[k][0]
+                choix_actuel[k]=chiffres_restant[k][0]
 
 
-            choix_actuel[pos_max+1]=chiffres_restant[pos_max][0]
+            choix_actuel[pos_max]=chiffres_restant[pos_max][0]
 
             return choix_actuel,chiffres_restant
 
@@ -96,39 +96,37 @@ combi=[]
 
 # servira pour creer les combinaisons
 chiffres_restant=[[j for j in range(2,n+1)] for x in range(dt_range)]
-choix_actuel=[0 for i in range(n+1)]
+choix_actuel=[0 for i in range(dt_range)]
 
 # Construction de la premiere Combinaison choisie
-for j in range(0,dt_range):
-    choix_actuel[j+1]=chiffres_restant[j][0]
+for j in range(dt_range):
+    choix_actuel[j]=chiffres_restant[j][0]
 
     # Enleve les chiffres deja utilises pour les combinaisons suivantes et empeche de depasser le dernier terme du range
     for m in range(min(j+1,dt_range),dt_range):
-        chiffres_restant[m].remove(choix_actuel[j+1])
-
-choix_actuel[0],choix_actuel[n]=1,1
-print(chiffres_restant)
-print(choix_actuel)
+        chiffres_restant[m].remove(choix_actuel[j])
 
 # Initialise les valeurs
-choix_enregistre=choix_actuel
+choix_enregistre=[1]+choix_actuel+[1]
 dist_enregistre=Distance(choix_enregistre,distances_tab,n)
 print("dist de depart",dist_enregistre)
 
 # Valeur que prendra choix_actuel a la fin (vois fonction Combinaison)
 while choix_actuel!=-1:
+    choix_actuel_complet=[1]+choix_actuel+[1]
 
     # Ajout dans la liste des combinaison
-    dist_actuelle=Distance(choix_actuel,distances_tab,n)
-    print(dist_actuelle)
+    dist_actuelle=Distance(choix_actuel_complet,distances_tab,n)
     if dist_actuelle<dist_enregistre:
 
-        choix_enregistre=choix_actuel
+        choix_enregistre=choix_actuel_complet
         dist_enregistre=dist_actuelle
 
-    combi.append(choix_actuel)
+    combi.append(choix_actuel_complet)
 
     choix_actuel=Combinaison(choix_actuel,chiffres_restant,n)[0]
+
+
 
 
 
