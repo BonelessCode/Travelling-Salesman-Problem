@@ -4,6 +4,18 @@ import numpy as np
 from random import *
 import statistics
 
+import colorama
+colorama.init()
+
+
+
+def move_cursor(x,y):
+    print ("\x1b[{};{}H".format(y+1,x+1))
+
+def clear():
+    print ("\x1b[2J")
+
+
 from sympy.solvers import solve
 from sympy import Symbol
 x = Symbol('x')
